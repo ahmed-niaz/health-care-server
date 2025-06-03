@@ -21,9 +21,6 @@ const createAdmin = async (req: Request, res: Response) => {
   }
 };
 
-// get admin
-const getAdmin = async (req: Request, res: Response) => {};
-
 export const userController = {
   createAdmin,
 };
