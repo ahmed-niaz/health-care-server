@@ -1,4 +1,4 @@
-import { Prisma } from "../../../generated/prisma";
+import { Admin, Prisma } from "../../../generated/prisma";
 import { adminSearchableFields } from "./admin.constant";
 import { calculatePagination } from "../../../helpers/paginationHelpers";
 import prisma from "../../../helpers/prisma";
@@ -89,7 +89,7 @@ const getAdmin = async (params: any, options: any) => {
   });
   */
 
-  return await prisma.admin.findMany({
+  const result = await prisma.admin.findMany({
     where: whereAsObject,
 
     // todo: pagination
@@ -98,14 +98,42 @@ const getAdmin = async (params: any, options: any) => {
 
     // todo: dynamically sorting [define by user]
     orderBy:
-      options.sortBy && options.sortOrder
-        ? {
-            [options.sortBy]: options.sortOrder,
-          }
-        : {
-            createdAt: "desc",
-          },
+      sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
   });
+
+  const total = await prisma.admin.count({
+    where: whereAsObject,
+  });
+
+  // todo: adding meta data
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
-export const adminService = { getAdmin };
+const getSingleAdmin = async (id: string) => {
+  const result = await prisma.admin.findUnique({ where: { id } });
+  return result;
+};
+
+const updateAdmin = async (id: string, payload: Partial<Admin>) => {
+  // console.log({ payload });
+  // console.log({ id });
+  // console.log("update admin value");
+
+  const result = await prisma.admin.update({
+    where: {
+      id,
+    },
+    data: payload,
+  });
+
+  return result;
+};
+
+export const adminService = { getAdmin, getSingleAdmin, updateAdmin };
