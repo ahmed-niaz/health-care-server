@@ -1,9 +1,8 @@
 // ! [perform different query]
 
-import { PrismaClient, UserRole } from "../../../generated/prisma";
+import { UserRole } from "../../../generated/prisma";
 import bcrypt from "bcrypt";
-
-const prisma = new PrismaClient();
+import prisma from "../../../helpers/prisma";
 
 const createAdmin = async (data: any) => {
   // password hashing

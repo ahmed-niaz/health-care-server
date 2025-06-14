@@ -11,8 +11,8 @@ const getAdmin = async (req: Request, res: Response) => {
   try {
     const filters = pick(req.query, filterableAdminFields);
     // console.log({ filters });
-    const options = pick(req.query, ["limit", "page"]);
-    // console.log({ options });
+    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+    console.log({ options });
     const result = await adminService.getAdmin(filters, options);
     res.status(200).json({
       success: true,

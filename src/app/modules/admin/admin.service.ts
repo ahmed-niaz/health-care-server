@@ -1,15 +1,14 @@
-import { equal } from "assert";
-import { Prisma, PrismaClient } from "../../../generated/prisma";
+import { Prisma } from "../../../generated/prisma";
 import { adminSearchableFields } from "./admin.constant";
-
-const prisma = new PrismaClient();
+import { calculatePagination } from "../../../helpers/paginationHelpers";
+import prisma from "../../../helpers/prisma";
 
 const getAdmin = async (params: any, options: any) => {
   // ! search on the specific fields.
 
   const { searchTerm, ...filterData } = params;
   const andConditions: Prisma.AdminWhereInput[] = [];
-  const { limit, page } = options;
+  const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
 
   /*
 
@@ -70,12 +69,42 @@ const getAdmin = async (params: any, options: any) => {
     });
   }
 
+  /*
   return await prisma.admin.findMany({
     where: whereAsObject,
 
     // todo: pagination
     skip: (Number(page) - 1) * limit,
     take: Number(limit),
+
+    // todo: dynamically sorting [define by user]
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
+  });
+  */
+
+  return await prisma.admin.findMany({
+    where: whereAsObject,
+
+    // todo: pagination
+    skip,
+    take: limit,
+
+    // todo: dynamically sorting [define by user]
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
   });
 };
 
