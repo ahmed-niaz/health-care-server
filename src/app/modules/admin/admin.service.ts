@@ -69,6 +69,11 @@ const getAdmin = async (params: any, options: any) => {
     });
   }
 
+  // todo: filtering data based on status
+  andConditions.push({
+    isDeleted: false,
+  });
+
   /*
   return await prisma.admin.findMany({
     where: whereAsObject,
@@ -117,7 +122,9 @@ const getAdmin = async (params: any, options: any) => {
 };
 
 const getSingleAdmin = async (id: string) => {
-  const result = await prisma.admin.findUnique({ where: { id } });
+  const result = await prisma.admin.findUnique({
+    where: { id, isDeleted: false },
+  });
   return result;
 };
 
@@ -129,6 +136,7 @@ const updateAdmin = async (id: string, payload: Partial<Admin>) => {
   await prisma.admin.findUniqueOrThrow({
     where: {
       id,
+      isDeleted: false,
     },
   });
 
@@ -181,6 +189,7 @@ const softDeleteAdmin = async (id: string) => {
   await prisma.admin.findUniqueOrThrow({
     where: {
       id,
+      isDeleted: false,
     },
   });
 
