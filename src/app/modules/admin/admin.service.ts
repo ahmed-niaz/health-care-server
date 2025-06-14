@@ -1,4 +1,4 @@
-import { Admin, Prisma } from "../../../generated/prisma";
+import { Admin, Prisma, UserStatus } from "../../../generated/prisma";
 import { adminSearchableFields } from "./admin.constant";
 import { calculatePagination } from "../../../helpers/paginationHelpers";
 import prisma from "../../../helpers/prisma";
@@ -126,6 +126,12 @@ const updateAdmin = async (id: string, payload: Partial<Admin>) => {
   // console.log({ id });
   // console.log("update admin value");
 
+  await prisma.admin.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
   const result = await prisma.admin.update({
     where: {
       id,
@@ -136,4 +142,80 @@ const updateAdmin = async (id: string, payload: Partial<Admin>) => {
   return result;
 };
 
-export const adminService = { getAdmin, getSingleAdmin, updateAdmin };
+const deleteAdmin = async (id: string) => {
+  // console.log({ id });
+  // console.log("delete admin data");
+
+  await prisma.admin.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  // todo: delete admin data and also delete fk for the admin data [email]
+  const result = await prisma.$transaction(async (adminTransaction) => {
+    // ! delete admin data based on ID
+    const deleteAdminData = await adminTransaction.admin.delete({
+      where: {
+        id,
+      },
+    });
+
+    // ! delete user data based on admin fk as email.
+    await adminTransaction.user.delete({
+      where: {
+        email: deleteAdminData.email,
+      },
+    });
+
+    return deleteAdminData;
+  });
+
+  return result;
+};
+
+const softDeleteAdmin = async (id: string) => {
+  // console.log({ id });
+  // console.log("delete admin data");
+
+  await prisma.admin.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  // todo: delete admin data and also delete fk for the admin data [email]
+  const result = await prisma.$transaction(async (adminTransaction) => {
+    // ! delete admin data based on ID
+    const deleteAdminData = await adminTransaction.admin.update({
+      where: {
+        id,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+    // ! delete user data based on admin fk as email.
+    await adminTransaction.user.update({
+      where: {
+        email: deleteAdminData.email,
+      },
+      data: {
+        status: UserStatus.deleted,
+      },
+    });
+
+    return deleteAdminData;
+  });
+
+  return result;
+};
+
+export const adminService = {
+  getAdmin,
+  getSingleAdmin,
+  updateAdmin,
+  deleteAdmin,
+  softDeleteAdmin,
+};
