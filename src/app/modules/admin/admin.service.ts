@@ -121,14 +121,24 @@ const getAdmin = async (params: any, options: any) => {
   };
 };
 
-const getSingleAdmin = async (id: string) => {
+const getSingleAdmin = async (id: string): Promise<Admin | null> => {
+  await prisma.admin.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+
   const result = await prisma.admin.findUnique({
     where: { id, isDeleted: false },
   });
   return result;
 };
 
-const updateAdmin = async (id: string, payload: Partial<Admin>) => {
+const updateAdmin = async (
+  id: string,
+  payload: Partial<Admin>
+): Promise<Admin | null> => {
   // console.log({ payload });
   // console.log({ id });
   // console.log("update admin value");
@@ -150,7 +160,7 @@ const updateAdmin = async (id: string, payload: Partial<Admin>) => {
   return result;
 };
 
-const deleteAdmin = async (id: string) => {
+const deleteAdmin = async (id: string): Promise<Admin | null> => {
   // console.log({ id });
   // console.log("delete admin data");
 
@@ -182,7 +192,7 @@ const deleteAdmin = async (id: string) => {
   return result;
 };
 
-const softDeleteAdmin = async (id: string) => {
+const softDeleteAdmin = async (id: string): Promise<Admin | null> => {
   // console.log({ id });
   // console.log("delete admin data");
 

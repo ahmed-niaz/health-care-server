@@ -1,8 +1,9 @@
-import express, { Application, Request, Response } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { userRoutes } from "./app/modules/users/user.routes";
-import { testRoutes } from "./app/modules/test/test.routes";
-import { adminRoutes } from "./app/modules/admin/admin.routes";
+import router from "./app/routes";
+import globalErrorHandler from "./app/middlewares/globalErrorHandlers";
+import status from "http-status";
+import notFound from "./app/middlewares/notFound";
 
 const app: Application = express();
 app.use(cors());
@@ -15,13 +16,15 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-// test routes
-app.use("/api/test", testRoutes);
+// todo: application routes
+app.use("/api/v1", router);
 
-// user routes
-app.use("/api/v1/user", userRoutes);
+app.use(globalErrorHandler);
+
+// todo:  not found while the wrong path.
+app.use(notFound);
 
 // admin routes
-app.use("/api/v1/admin", adminRoutes);
+// app.use("/api/v1/admin", adminRoutes);
 
 export default app;
