@@ -141,7 +141,6 @@ const updateAdmin = async (
 ): Promise<Admin | null> => {
   // console.log({ payload });
   // console.log({ id });
-  // console.log("update admin value");
 
   await prisma.admin.findUniqueOrThrow({
     where: {

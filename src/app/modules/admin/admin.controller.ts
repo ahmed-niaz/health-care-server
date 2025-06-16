@@ -1,10 +1,12 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { adminService } from "./admin.service";
 import { pick } from "../../../shared/pick";
 import { filterableAdminFields } from "./admin.constant";
 import sendResponse from "../../../shared/sendResponse";
 import status from "http-status";
+import catchAsync from "../../../shared/catchAsync";
 
+/*
 const getAdmin = async (req: Request, res: Response, next: NextFunction) => {
   //   console.log("from the postman search or filter query", req.query);
 
@@ -27,6 +29,26 @@ const getAdmin = async (req: Request, res: Response, next: NextFunction) => {
     next(err);
   }
 };
+*/
+
+const getAdmin = catchAsync(async (req, res) => {
+  //   console.log("from the postman search or filter query", req.query);
+
+  // todo -4: pagination
+
+  const filters = pick(req.query, filterableAdminFields);
+  // console.log({ filters });
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+  console.log({ options });
+  const result = await adminService.getAdmin(filters, options);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "admin data retrieve successfully",
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
 const getSingleAdmin = async (
   req: Request,

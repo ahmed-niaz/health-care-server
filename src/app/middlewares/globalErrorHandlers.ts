@@ -7,7 +7,7 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log("error is found");
+  console.log("error is found from the global error handler");
 
   res.status(status.INTERNAL_SERVER_ERROR).json({
     success: false,
