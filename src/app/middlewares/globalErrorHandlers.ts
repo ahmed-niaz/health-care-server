@@ -11,7 +11,7 @@ const globalErrorHandler = (
 
   res.status(status.INTERNAL_SERVER_ERROR).json({
     success: false,
-    message: err.name || "something went wrong",
+    message: err.message || "something went wrong",
     error: err,
   });
 };
