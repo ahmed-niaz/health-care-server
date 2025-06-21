@@ -6,11 +6,11 @@ import status from "http-status";
 
 const auth = (...roles: string[]) => {
   // ! need to add call back fn
-  return (req: Request, res: Response, next: NextFunction) => {
-    console.log(roles);
+  return (req: Request & { user?: any }, res: Response, next: NextFunction) => {
+    // console.log({ roles });
     try {
       const token = req.headers.authorization;
-      console.log(token);
+      // console.log({ token });
 
       if (!token) {
         throw new apiError(
