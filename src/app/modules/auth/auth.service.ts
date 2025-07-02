@@ -85,6 +85,7 @@ const userLogin = async (payload: { email: string; password: string }) => {
   };
 };
 
+// ! refresh Token
 const refreshToken = async (payload: string) => {
   // console.log("refreshToken ...", payload);
 
@@ -120,7 +121,7 @@ const refreshToken = async (payload: string) => {
   };
 };
 
-// ** update password
+//! update password
 const changePassword = async (payload: any, user: any) => {
   console.log("change the password", payload);
   console.log("change the password", user);
@@ -174,6 +175,7 @@ const changePassword = async (payload: any, user: any) => {
   };
 };
 
+//! forgot password
 const forgotPassword = async (payload: { email: string }) => {
   console.log("forgot password", payload);
 
@@ -277,6 +279,7 @@ const forgotPassword = async (payload: { email: string }) => {
   // todo: send reset password in the email
 };
 
+//! reset password
 const resetPassword = async (
   token: string,
   payload: {

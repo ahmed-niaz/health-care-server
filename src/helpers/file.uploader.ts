@@ -28,7 +28,7 @@ const upload = multer({ storage: storage });
 const uploadToCloudinary = async (
   file: IFile
 ): Promise<ICloudinaryResponse | undefined> => {
-  console.log("upload to cloudinary", file);
+  // console.log("upload to cloudinary", file);
 
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(

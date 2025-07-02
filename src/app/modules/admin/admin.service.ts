@@ -126,6 +126,7 @@ const getAdmin = async (
   };
 };
 
+// ! get single admin
 const getSingleAdmin = async (id: string): Promise<Admin | null> => {
   await prisma.admin.findUniqueOrThrow({
     where: {
@@ -140,6 +141,7 @@ const getSingleAdmin = async (id: string): Promise<Admin | null> => {
   return result;
 };
 
+// ! update admin data
 const updateAdmin = async (
   id: string,
   payload: Partial<Admin>
