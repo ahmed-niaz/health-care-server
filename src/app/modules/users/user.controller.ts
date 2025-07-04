@@ -6,6 +6,7 @@ import sendResponse from "../../../shared/sendResponse";
 import status from "http-status";
 import catchAsync from "../../../shared/catchAsync";
 import { userFilterableFields, userOptionalFields } from "./user.constant";
+import { IAuthUser } from "./user.interface";
 
 //! create admin
 const createAdmin = async (req: Request, res: Response) => {
@@ -101,10 +102,43 @@ const changeProfileStatus = catchAsync(async (req, res) => {
   });
 });
 
+// ! get profile information
+const myProfile = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await userService.myProfile(user as IAuthUser);
+    sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: "💥 i got the profile",
+      data: result,
+    });
+  }
+);
+
+// todo: update profile data
+const updateProfileData = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res: Response) => {
+    const user = req.user;
+    // const formData = req.body;
+    // console.log(formData);
+    // console.log(req.file);
+    const result = await userService.updateProfileData(user as IAuthUser, req);
+    sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: "profile data has been updated successfully 🙀",
+      data: result,
+    });
+  }
+);
+
 export const userController = {
   createAdmin,
   createDoctor,
   createPatient,
   getUsers,
   changeProfileStatus,
+  myProfile,
+  updateProfileData,
 };

@@ -31,6 +31,7 @@ const getAdmin = async (req: Request, res: Response, next: NextFunction) => {
 };
 */
 
+//! get all admin data
 const getAdmin = catchAsync(async (req, res) => {
   //   console.log("from the postman search or filter query", req.query);
 
@@ -50,6 +51,7 @@ const getAdmin = catchAsync(async (req, res) => {
   });
 });
 
+// ! get single admin data
 const getSingleAdmin = async (
   req: Request,
   res: Response,

@@ -79,7 +79,8 @@ model Doctor {
   updatedAt           DateTime @updatedAt
 
   // ** one to one relation
-  user User @relation(fields: [email], references: [email])
+  user              User                @relation(fields: [email], references: [email])
+  doctorSpecialties DoctorSpecialties[]
 
   @@map("doctors")
 }
@@ -105,4 +106,29 @@ model Patient {
   user User @relation(fields: [email], references: [email])
 
   @@map("patients")
+}
+
+// ! Specialties model
+
+model Specialties {
+  id                String              @id @default(uuid())
+  title             String
+  icon              String
+  doctorSpecialties DoctorSpecialties[]
+
+  @@map("specialties")
+}
+
+// ! DoctorSpecialties [intermediate table for many to many]
+
+model DoctorSpecialties {
+  specialtiesId String
+  doctorId      String
+
+  specialties Specialties @relation(fields: [specialtiesId], references: [id])
+  doctor      Doctor      @relation(fields: [doctorId], references: [id])
+
+  // todo: composite key
+  @@id([specialtiesId, doctorId])
+  @@map("doctor_specialties")
 }

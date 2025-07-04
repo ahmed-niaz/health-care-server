@@ -4,6 +4,7 @@ import auth from "../../middlewares/auth";
 import { UserRole } from "../../../generated/prisma";
 import { fileUploader } from "../../../helpers/file.uploader";
 import { userValidation } from "./user.validation";
+import validateRequest from "../../middlewares/validateRequest";
 
 const router = express.Router();
 
@@ -12,6 +13,13 @@ router.get(
   "/",
   auth(UserRole.admin, UserRole.super_admin),
   userController.getUsers
+);
+
+// todo: get profile information
+router.get(
+  "/profile",
+  auth(UserRole.admin, UserRole.super_admin, UserRole.doctor, UserRole.patient),
+  userController.myProfile
 );
 
 // ! admin routes
@@ -66,6 +74,27 @@ router.post(
 );
 
 // todo: change the ProfileStatus
-router.patch("/:id/status", userController.changeProfileStatus);
+router.patch(
+  "/:id/status",
+  auth(UserRole.admin, UserRole.super_admin),
+  validateRequest(userValidation.updateUserStatusValidationSchema),
+  userController.changeProfileStatus
+);
+
+// todo: update profile data
+router.patch(
+  "/update-profile",
+  auth(UserRole.admin, UserRole.super_admin, UserRole.doctor, UserRole.patient),
+  fileUploader.upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // todo: parse the data to the json format
+      req.body = JSON.parse(req.body.data);
+      return userController.updateProfileData(req, res, next);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 export const userRoutes = router;

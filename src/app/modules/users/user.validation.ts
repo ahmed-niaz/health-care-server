@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Gender } from "../../../generated/prisma";
+import { Gender, UserStatus } from "../../../generated/prisma";
 
 // todo: admin validation schema
 const createAdminValidationSchema = z.object({
@@ -80,8 +80,21 @@ const createPatientValidationSchema = z.object({
   }),
 });
 
+const updateUserStatusValidationSchema = z.object({
+  body: z
+    .object({
+      status: z.enum([
+        UserStatus.active,
+        UserStatus.blocked,
+        UserStatus.deleted,
+      ]),
+    })
+    .strict(),
+});
+
 export const userValidation = {
   createAdminValidationSchema,
   createDoctorValidationSchema,
   createPatientValidationSchema,
+  updateUserStatusValidationSchema,
 };
