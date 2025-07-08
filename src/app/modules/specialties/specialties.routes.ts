@@ -5,7 +5,7 @@ import { specialtiesValidation } from "./specialties.validation";
 
 const router = express.Router();
 
-router.get("/specialties", specialtiesController.getSpecialties);
+router.get("/", specialtiesController.getSpecialties);
 
 router.post(
   "/",
@@ -19,6 +19,6 @@ router.post(
   }
 );
 
-router.delete("/specialties/:id", specialtiesController.deleteSpecialties);
+router.delete("/:id", specialtiesController.deleteSpecialties);
 
 export const specialtiesRoutes = router;

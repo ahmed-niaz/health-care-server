@@ -73,7 +73,7 @@ const createDoctor = async (req: Request): Promise<Doctor> => {
 
   // todo:  password hashing
   const hashedPassword: string = await bcrypt.hash(req.body.password, 12);
-  console.log({ hashedPassword });
+  // console.log({ hashedPassword });
 
   //   console.log(data.admin);
   const userData = {
