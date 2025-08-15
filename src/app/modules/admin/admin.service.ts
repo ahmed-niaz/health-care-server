@@ -14,7 +14,7 @@ const getAdmin = async (
   const { searchTerm, ...filterData } = params;
   const andConditions: Prisma.AdminWhereInput[] = [];
   const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
-  console.log({ params });
+
   /*
 
   console.log({ params });
