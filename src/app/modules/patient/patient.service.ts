@@ -1,7 +1,8 @@
-import { Prisma } from "../../../generated/prisma";
+import { Patient, Prisma } from "../../../generated/prisma";
 import { calculatePagination } from "../../../helpers/paginationHelpers";
 import prisma from "../../../helpers/prisma";
 import { searchablePatientFields } from "./patient.constant";
+import { IPatientUpdate } from "./patient.interface";
 
 const getDoctor = async (params: any, options: any) => {
   const { searchTerm, ...filters } = params;
@@ -45,6 +46,10 @@ const getDoctor = async (params: any, options: any) => {
         : {
             createdAt: "desc",
           },
+    include: {
+      medicalReport: true,
+      patientHealthData: true,
+    },
   });
 
   // todo: count total patient data
@@ -59,6 +64,76 @@ const getDoctor = async (params: any, options: any) => {
   };
 };
 
+const updatePatient = async (
+  id: string,
+  payload: Partial<IPatientUpdate>
+): Promise<Patient | null> => {
+  const { patientHealthData, medicalReport, ...patientInformation } = payload;
+  // console.log({ patientHealthData, medicalReport });
+  const patientData = await prisma.patient.findUnique({
+    where: { id },
+  });
+
+  if (!patientData) {
+    throw new Error("Patient data is not available ⚠️");
+  }
+  //  console.log(patientData.id);
+
+  const result = await prisma.$transaction(async (transactionClient) => {
+    // todo 1: update patient data
+    const updatedPatientInformation = await transactionClient.patient.update({
+      where: { id },
+      data: patientInformation,
+      include: {
+        medicalReport: true,
+        patientHealthData: true,
+      },
+    });
+
+    // todo 2: update patientHealthData or create patientHealthData.
+
+    if (patientHealthData) {
+      // const healthData =
+      await transactionClient.patientHealthData.upsert({
+        where: {
+          patientId: updatedPatientInformation.id,
+        },
+        update: patientHealthData,
+        create: {
+          ...patientHealthData,
+          patientId: updatedPatientInformation.id,
+        },
+      });
+
+      // console.log(healthData);
+    }
+
+    // todo 3:  create medical report.
+    if (medicalReport) {
+      // const medicalReportData =
+      await transactionClient.medicalReport.create({
+        data: {
+          ...medicalReport,
+          patientId: updatedPatientInformation.id,
+        },
+      });
+
+      // console.log(medicalReport);
+    }
+  });
+
+  const responseData = await prisma.patient.findUnique({
+    where: { id: patientData.id },
+    include: {
+      medicalReport: true,
+      patientHealthData: true,
+    },
+  });
+
+  return responseData;
+};
+
 export const patientService = {
   getDoctor,
+  updatePatient,
 };
