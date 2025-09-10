@@ -81,6 +81,7 @@ model Doctor {
   // ** one to one relation
   user              User                @relation(fields: [email], references: [email])
   doctorSpecialties DoctorSpecialties[]
+  doctorSchedules   DoctorSchedules[]
 
   @@map("doctors")
 }
@@ -103,8 +104,8 @@ model Patient {
   updatedAt     DateTime @updatedAt
 
   // ** one to one relation
-  user              User               @relation(fields: [email], references: [email])
-  patientHealthData PatientHealthData? // one to one relation
+  user              User               @relation(fields: [email], references: [email]) //3D
+  patientHealthData PatientHealthData? // one to one relation 1D
   medicalReport     MedicalReport[] // one to many
 
   @@map("patients")
@@ -192,4 +193,32 @@ model MedicalReport {
   patient Patient @relation(fields: [patientId], references: [id])
 
   @@map("medicalReport")
+}
+
+// ! model schedule
+model Schedule {
+  id              String            @id @default(uuid())
+  startTimeDate   DateTime
+  endTimeDate     DateTime
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  doctorSchedules DoctorSchedules[]
+
+  @@map("schedules")
+}
+
+// ! model DoctorSchedules
+model DoctorSchedules {
+  doctorId      String
+  scheduleId    String
+  isBooked      Boolean @default(false)
+  appointmentId String?
+
+  // todo: mark where the foreign key
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+  doctor   Doctor   @relation(fields: [doctorId], references: [id])
+
+  // todo: composite key
+  @@id([doctorId, scheduleId])
+  @@map("doctor_schedules")
 }

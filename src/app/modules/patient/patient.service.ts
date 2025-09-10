@@ -4,7 +4,7 @@ import prisma from "../../../helpers/prisma";
 import { searchablePatientFields } from "./patient.constant";
 import { IPatientUpdate } from "./patient.interface";
 
-const getDoctor = async (params: any, options: any) => {
+const getPatient = async (params: any, options: any) => {
   const { searchTerm, ...filters } = params;
   const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
   const andConditions: Prisma.PatientWhereInput[] = [];
@@ -64,6 +64,24 @@ const getDoctor = async (params: any, options: any) => {
   };
 };
 
+const getSinglePatient = async (id: string) => {
+  const patientData = await prisma.patient.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      medicalReport: true,
+      patientHealthData: true,
+    },
+  });
+
+  if (!patientData) {
+    throw new Error("patient data is not available");
+  }
+
+  return patientData;
+};
+
 const updatePatient = async (
   id: string,
   payload: Partial<IPatientUpdate>
@@ -71,7 +89,7 @@ const updatePatient = async (
   const { patientHealthData, medicalReport, ...patientInformation } = payload;
   // console.log({ patientHealthData, medicalReport });
   const patientData = await prisma.patient.findUnique({
-    where: { id },
+    where: { id, isDeleted: false },
   });
 
   if (!patientData) {
@@ -79,7 +97,7 @@ const updatePatient = async (
   }
   //  console.log(patientData.id);
 
-  const result = await prisma.$transaction(async (transactionClient) => {
+  await prisma.$transaction(async (transactionClient) => {
     // todo 1: update patient data
     const updatedPatientInformation = await transactionClient.patient.update({
       where: { id },
@@ -133,7 +151,68 @@ const updatePatient = async (
   return responseData;
 };
 
+const deletePatient = async (id: string): Promise<Patient | null> => {
+  return await prisma.$transaction(async (patientTransactions) => {
+    // todo: delete medical Report
+    await patientTransactions.medicalReport.deleteMany({
+      where: {
+        patientId: id,
+      },
+    });
+
+    // todo: delete patientHealthData
+    await patientTransactions.patientHealthData.delete({
+      where: {
+        patientId: id,
+      },
+    });
+
+    // todo: delete patient data
+    const deletedPatientData = await patientTransactions.patient.delete({
+      where: {
+        id,
+      },
+    });
+
+    // todo: delete user data
+    await patientTransactions.user.delete({
+      where: {
+        email: deletedPatientData.email,
+      },
+    });
+
+    return deletedPatientData;
+  });
+};
+
+const softDelete = async (id: string): Promise<Patient | null | void> => {
+  return await prisma.$transaction(async (patientTrx) => {
+    // todo: update patient data
+    const deletePatient = await patientTrx.patient.update({
+      where: {
+        id,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+    // todo: update user data
+    await patientTrx.user.update({
+      where: {
+        email: deletePatient.email,
+      },
+      data: {
+        status: "deleted",
+      },
+    });
+  });
+};
+
 export const patientService = {
-  getDoctor,
+  getPatient,
+  getSinglePatient,
   updatePatient,
+  deletePatient,
+  softDelete,
 };
