@@ -82,6 +82,7 @@ model Doctor {
   user              User                @relation(fields: [email], references: [email])
   doctorSpecialties DoctorSpecialties[]
   doctorSchedules   DoctorSchedules[]
+  appointment       Appointment[]
 
   @@map("doctors")
 }
@@ -107,6 +108,7 @@ model Patient {
   user              User               @relation(fields: [email], references: [email]) //3D
   patientHealthData PatientHealthData? // one to one relation 1D
   medicalReport     MedicalReport[] // one to many
+  appointment       Appointment[] // one to many
 
   @@map("patients")
 }
@@ -203,6 +205,7 @@ model Schedule {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   doctorSchedules DoctorSchedules[]
+  appointment     Appointment? // one to one [@unique]
 
   @@map("schedules")
 }
@@ -221,4 +224,34 @@ model DoctorSchedules {
   // todo: composite key
   @@id([doctorId, scheduleId])
   @@map("doctor_schedules")
+}
+
+model Appointment {
+  id             String            @id @default(uuid())
+  patientId      String
+  doctorId       String
+  scheduleId     String            @unique
+  videoCallingId String
+  status         AppointmentStatus @default(scheduled)
+  paymentStatus  PaymentStatus     @default(unpaid)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  patient  Patient  @relation(fields: [patientId], references: [id]) //fk
+  doctor   Doctor   @relation(fields: [doctorId], references: [id]) //fk
+  schedule Schedule @relation(fields: [scheduleId], references: [id]) //fk
+
+  @@map("appointments")
+}
+
+enum AppointmentStatus {
+  scheduled
+  inprogress
+  completed
+  canceled
+}
+
+enum PaymentStatus {
+  paid
+  unpaid
 }
