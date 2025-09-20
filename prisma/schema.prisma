@@ -215,11 +215,12 @@ model DoctorSchedules {
   doctorId      String
   scheduleId    String
   isBooked      Boolean @default(false)
-  appointmentId String?
+  appointmentId String? @unique
 
   // todo: mark where the foreign key
-  schedule Schedule @relation(fields: [scheduleId], references: [id])
-  doctor   Doctor   @relation(fields: [doctorId], references: [id])
+  schedule    Schedule     @relation(fields: [scheduleId], references: [id])
+  doctor      Doctor       @relation(fields: [doctorId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
 
   // todo: composite key
   @@id([doctorId, scheduleId])
@@ -237,9 +238,11 @@ model Appointment {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
-  patient  Patient  @relation(fields: [patientId], references: [id]) //fk
-  doctor   Doctor   @relation(fields: [doctorId], references: [id]) //fk
-  schedule Schedule @relation(fields: [scheduleId], references: [id]) //fk
+  patient         Patient          @relation(fields: [patientId], references: [id]) //fk
+  doctor          Doctor           @relation(fields: [doctorId], references: [id]) //fk
+  schedule        Schedule         @relation(fields: [scheduleId], references: [id]) //fk
+  doctorSchedules DoctorSchedules?
+  payment         Payment?
 
   @@map("appointments")
 }
@@ -254,4 +257,19 @@ enum AppointmentStatus {
 enum PaymentStatus {
   paid
   unpaid
+}
+
+model Payment {
+  id                 String        @id @default(uuid())
+  appointmentId      String        @unique
+  amount             Float
+  transactionId      String
+  status             PaymentStatus @default(unpaid)
+  paymentGatewayList Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id]) //fk one to one
+
+  @@map("payments")
 }
